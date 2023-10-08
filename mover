@@ -4,35 +4,35 @@ using UnityEngine;
 
 public class Mover : MonoBehaviour
 {
-    public float movementSpeed = 5.0f; // Ñêîðîñòü äâèæåíèÿ
-    public float rotationSpeed = 5.0f; // Ñêîðîñòü âðàùåíèÿ
-    private Transform targetPoint; // Öåëü (áëèæàéøèé îáúåêò ñ òåãîì "point")
+    public float movementSpeed = 5.0f; // Скорость движения
+    public float rotationSpeed = 5.0f; // Скорость вращения
+    private Transform targetPoint; // Цель (ближайший объект с тегом "point")
 
     private void Update()
     {
         if (CharacterMovement.game_is_start)
         {
-            // Åñëè öåëü íå óñòàíîâëåíà, íàéäåì áëèæàéøèé îáúåêò ñ òåãîì "point"
+            // Если цель не установлена, найдем ближайший объект с тегом "point"
             if (targetPoint == null)
             {
                 FindNearestPoint();
             }
 
-            // Åñëè åñòü öåëü, äâèãàåìñÿ ê íåé è âðàùàåìñÿ ê íåé
+            // Если есть цель, двигаемся к ней и вращаемся к ней
             if (targetPoint != null)
             {
-                // Âðàùåíèå ê öåëè
+                // Вращение к цели
                 Quaternion targetRotation = Quaternion.LookRotation(targetPoint.position - transform.position);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
-                // Âû÷èñëåíèå íàïðàâëåíèÿ äâèæåíèÿ
+                // Вычисление направления движения
                 Vector3 moveDirection = (targetPoint.position - transform.position).normalized;
                 Vector3 velocity = moveDirection * movementSpeed;
 
-                // Ïåðåìåùåíèå îáúåêòà ñ ó÷åòîì íàïðàâëåíèÿ è ñêîðîñòè
+                // Перемещение объекта с учетом направления и скорости
                 transform.position += velocity * Time.deltaTime;
 
-                // Åñëè äîñòèãëè öåëè, óáèðàåì öåëü, ÷òîáû íàéòè ñëåäóþùóþ
+                // Если достигли цели, убираем цель, чтобы найти следующую
                 if (Vector3.Distance(transform.position, targetPoint.position) < 0.1f)
                 {
                     Destroy(targetPoint.gameObject);
@@ -42,7 +42,7 @@ public class Mover : MonoBehaviour
         }
     }
 
-    // Ìåòîä äëÿ ïîèñêà áëèæàéøåãî îáúåêòà ñ òåãîì "point"
+    // Метод для поиска ближайшего объекта с тегом "point"
     private void FindNearestPoint()
     {
         GameObject[] pointObjects = GameObject.FindGameObjectsWithTag("point");
