@@ -1,0 +1,64 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Mover : MonoBehaviour
+{
+    public float movementSpeed = 5.0f; // Ñêîðîñòü äâèæåíèÿ
+    public float rotationSpeed = 5.0f; // Ñêîðîñòü âðàùåíèÿ
+    private Transform targetPoint; // Öåëü (áëèæàéøèé îáúåêò ñ òåãîì "point")
+
+    private void Update()
+    {
+        if (CharacterMovement.game_is_start)
+        {
+            // Åñëè öåëü íå óñòàíîâëåíà, íàéäåì áëèæàéøèé îáúåêò ñ òåãîì "point"
+            if (targetPoint == null)
+            {
+                FindNearestPoint();
+            }
+
+            // Åñëè åñòü öåëü, äâèãàåìñÿ ê íåé è âðàùàåìñÿ ê íåé
+            if (targetPoint != null)
+            {
+                // Âðàùåíèå ê öåëè
+                Quaternion targetRotation = Quaternion.LookRotation(targetPoint.position - transform.position);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+                // Âû÷èñëåíèå íàïðàâëåíèÿ äâèæåíèÿ
+                Vector3 moveDirection = (targetPoint.position - transform.position).normalized;
+                Vector3 velocity = moveDirection * movementSpeed;
+
+                // Ïåðåìåùåíèå îáúåêòà ñ ó÷åòîì íàïðàâëåíèÿ è ñêîðîñòè
+                transform.position += velocity * Time.deltaTime;
+
+                // Åñëè äîñòèãëè öåëè, óáèðàåì öåëü, ÷òîáû íàéòè ñëåäóþùóþ
+                if (Vector3.Distance(transform.position, targetPoint.position) < 0.1f)
+                {
+                    Destroy(targetPoint.gameObject);
+                    FindNearestPoint();
+                }
+            }
+        }
+    }
+
+    // Ìåòîä äëÿ ïîèñêà áëèæàéøåãî îáúåêòà ñ òåãîì "point"
+    private void FindNearestPoint()
+    {
+        GameObject[] pointObjects = GameObject.FindGameObjectsWithTag("point");
+        if (pointObjects.Length > 0)
+        {
+            float closestDistance = float.MaxValue;
+
+            foreach (GameObject pointObject in pointObjects)
+            {
+                float distance = Vector3.Distance(transform.position, pointObject.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    targetPoint = pointObject.transform;
+                }
+            }
+        }
+    }
+}
